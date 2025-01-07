@@ -20,33 +20,6 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 def create_model(model_name, pretrained=True):
     return timm.create_model(model_name, pretrained=pretrained)
 
-# BiomedCLIP Classifier definition
-def build_biomedclip_classifier(num_classes, dropout_rate=0.5, activation=torch.nn.ReLU, freeze_layers=0):
-    class BiomedCLIPClassifier(torch.nn.Module):
-        def __init__(self):
-            super(BiomedCLIPClassifier, self).__init__()
-            self.base_model = create_model("vit_base_patch16_224", pretrained=True)
-            for param in self.base_model.parameters():
-                param.requires_grad = False
-
-            if freeze_layers > 0:
-                for name, param in list(self.base_model.named_parameters())[-freeze_layers:]:
-                    param.requires_grad = True
-
-            self.fc = torch.nn.Sequential(
-                torch.nn.Linear(self.base_model.head.in_features, 512),
-                activation(),
-                torch.nn.Dropout(p=dropout_rate),
-                torch.nn.Linear(512, num_classes)
-            )
-
-        def forward(self, x):
-            features = self.base_model.forward_features(x)
-            pooled_features = features[:, 0]
-            return self.fc(pooled_features)
-
-    return BiomedCLIPClassifier().to(DEVICE)
-
 # Dataset class analysis
 def analyze_classes(dataset):
     class_counts = {class_name: 0 for class_name in dataset.get_classes()}
