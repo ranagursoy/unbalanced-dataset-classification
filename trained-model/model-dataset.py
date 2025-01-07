@@ -61,6 +61,14 @@ class BalancedSpermDataset(Dataset):
             if self.transform:
                 img = self.transform(img)
         return img, label
+    
+    def get_transforms():
+    return A.Compose([
+        A.Resize(224, 224),
+        A.HorizontalFlip(p=0.5),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2()
+    ])
 
     def get_classes(self):
         return self.classes
